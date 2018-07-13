@@ -3,6 +3,9 @@ package com.ngdroidapp;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import istanbul.gamelab.ngdroid.base.BaseCanvas;
 import istanbul.gamelab.ngdroid.util.Log;
 import istanbul.gamelab.ngdroid.util.Utils;
@@ -15,7 +18,8 @@ import istanbul.gamelab.ngdroid.util.Utils;
 
 
 public class GameCanvas extends BaseCanvas {
-
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference("message");
     private Bitmap logo;
     private int logox, logoy, logow, logoh;
 
