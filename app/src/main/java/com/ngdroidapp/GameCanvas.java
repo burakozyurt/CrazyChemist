@@ -2,6 +2,7 @@ package com.ngdroidapp;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -9,43 +10,68 @@ import com.google.firebase.database.FirebaseDatabase;
 import istanbul.gamelab.ngdroid.base.BaseCanvas;
 import istanbul.gamelab.ngdroid.util.Log;
 import istanbul.gamelab.ngdroid.util.Utils;
+import istanbul.gamelab.ngdroid.util.VirtualJoystick;
 
 
 /**
- * Created by noyan on 24.06.2016.
- * Nitra Games Ltd.
+ * Created by A. Melik ERSOY on 07.09.2018.
+ *
  */
 
 
 public class GameCanvas extends BaseCanvas {
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("message");
-    private Bitmap logo;
-    private int logox, logoy, logow, logoh;
 
+    private Bitmap backgraund;
+    private Rect backgraundSrc, backgraundDst;
+    private int backgraundSrcX, backgraundSrcY, backgraundSrcW, backgraundSrcH, backgraundDstX, backgraundDstY, backgraundDstW, backgraundDstH;
+    private int firstElement, secondElement, thirdElement, fourthElement, fifthElement; //Array Element Sequence
+    private int[][] touchDownPoint, touchUpPoint, touchMovePoint; //Touch Activites Points and Id
+    private VirtualJoystick virtualJoystick;
 
     public GameCanvas(NgApp ngApp) {
         super(ngApp);
     }
 
     public void setup() {
-        Log.i(TAG, "setup");
-
-        logo = Utils.loadImage(root,"gamelab-istanbul_logo.png");
-        logow = logo.getWidth();
-        logoh = logo.getHeight();
+        initializeVariables();
     }
 
     public void update() {
-        Log.i(TAG, "update");
     }
 
     public void draw(Canvas canvas) {
-        Log.i(TAG, "draw");
+        canvas.drawBitmap(backgraund, backgraundSrc, backgraundDst, null);
+        virtualJoystick.drawJoystick(root, canvas, "Right");
+        virtualJoystick.drawJoystick(root, canvas, "Left");
+        root.gui.drawText(canvas, "FPS: " + root.appManager.getFrameRate() + " / " + root.appManager.getFrameRateTarget(), getWidth()/10, getHeight()/15, 0);
+    }
 
-        logox = (getWidth() - logow) / 2;
-        logoy = (getHeight() - logoh) / 2;
-        canvas.drawBitmap(logo, logox, logoy, null);
+    /**
+     * This method assigns initial values, called from setup method.
+     *
+     */
+    public void initializeVariables() {
+        backgraund = Utils.loadImage(root,"background.png");
+        backgraundSrcW = backgraund.getWidth();
+        backgraundSrcH = backgraund.getHeight();
+        backgraundSrcX = 0;
+        backgraundSrcY = 0;
+        backgraundDstW = root.proportionWidth(backgraundSrcW);
+        backgraundDstH = root.proportionHeight(backgraundSrcH);
+        backgraundDstX = 0;
+        backgraundDstY = 0;
+
+        backgraundSrc = new Rect();
+        backgraundDst = new Rect();
+
+        backgraundSrc.set(backgraundSrcX, backgraundSrcY, backgraundSrcW, backgraundSrcH);
+        backgraundDst.set(backgraundDstX, backgraundDstY, backgraundDstX + backgraundDstW, backgraundDstY + backgraundDstH);
+
+        virtualJoystick = new VirtualJoystick();
+
+        touchDownPoint = new int[3][2];
+        touchUpPoint = new int[3][2];
+        touchMovePoint = new int[3][2];
     }
 
     public void keyPressed(int key) {
@@ -73,12 +99,18 @@ public class GameCanvas extends BaseCanvas {
     }
 
     public void touchDown(int x, int y, int id) {
+        touchDownPoint[id][0] = x;
+        touchDownPoint[id][1] = y;
     }
 
     public void touchMove(int x, int y, int id) {
+        touchMovePoint[id][0] = x;
+        touchMovePoint[id][1] = y;
     }
 
     public void touchUp(int x, int y, int id) {
+        touchUpPoint[id][0] = x;
+        touchUpPoint[id][1] = y;
     }
 
 
